@@ -3,14 +3,7 @@
 library(rvest)
 library(data.table)
 library(jsonlite)
-
-# Task 1: when I change car name to Opel, it should get data from that page
-# https://joautok.hu/hasznaltauto/alfa-romeo
-
-
-# datePublished, budget, rating (ratingValue inside aggregateRating)
-# "duration": "PT2H22M",
-# actors, director, keywords, 
+library(ggplot2)
 
 url <- 'https://www.imdb.com/chart/top'
 file_html <- read_html(url)
@@ -47,7 +40,15 @@ for(x in links_c) {
   links <- c(links, paste0('https://www.imdb.com', x)) 
 }
 
+# to create a dataframe
+df <- data.frame('movie_title' = movie_names, 'rating' = ratings, 'date_released' = years, 'link' = links)  
+
+# First EDA:
 summary(ratings)
+
+# Movie with minimum rating: 8
+# Movie with maximum rating: 9.2
+
 
 
 url_demo <- links[1]
@@ -58,12 +59,58 @@ json_data <-
       html_nodes(xpath = "//script[@type='application/ld+json']") %>%
       html_text())
 
-budget_p <- 
+revenue_p <- 
   movie_file %>%
   html_nodes('.txt-block:nth-child(15)') %>% 
   html_text(trim = T)
   
-budget <- as.numeric(gsub(",","",substr(budget_p, 30, 40)))
+revenue <- as.numeric(gsub(",","",substr(revenue_p, 30, 40)))
+
+budget_p <- 
+  movie_file %>%
+  html_nodes('#titleDetails .txt-block:nth-child(12)') %>% 
+  html_text(trim = T)
+
+budget <- as.numeric(gsub(",","",substr(budget_p, 9, 18)))
+log(budget)
+budget
+# is there a connection between the revenue and the budget.
+
+qplot(years, 
+      geom="histogram", 
+      binwidth = 1,
+      xlim=c(1921,2020)) 
+years
+
+# Second EDA:
+summary(years)
+# this statistics shows that
+# the oldest movie (min) is taken in 1921, and youngest is in 2020 (max)
+
+most_appeared_years <- table(years)
+# most of the movies (8) released in 1995 
+
+# movie with the highest budget
+# movie with the lowest budget
+
+for (x in years) {
+  print(x)
+}
+
+uniques <- unique(years)
+
+
+
+
+
+# Task 1: when I change car name to Opel, it should get data from that page
+# https://joautok.hu/hasznaltauto/alfa-romeo
+
+
+# datePublished, budget, rating (ratingValue inside aggregateRating)
+# "duration": "PT2H22M",
+# actors, director, keywords, 
+
 
 
 
