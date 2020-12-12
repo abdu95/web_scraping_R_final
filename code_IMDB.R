@@ -61,6 +61,24 @@ movie_names <-
 
 
 movie_names
+
+url <- 'https://www.autotrader.com/cars-for-sale/bmw?channel=ATC&relevanceConfig=default&searchRadius=0&marketExtension=include&isNewSearch=true&showAccelerateBanner=false&sortBy=relevance&numRecords=25'
+file_html <- read_html(url)
+
+cars <- 
+  file_html %>%  
+  html_nodes('.item-card') %>% 
+  html_nodes('a')
+
+cars <- 
+  file_html %>%  
+  html_nodes('.positioned-overlay-base') %>% 
+  html_nodes('a') %>% 
+  html_attr('href')
+
+
+cars
+
 #apply a function to a list
 df_list <- lapply(test_urls, get_one_page_from_vox)
 
