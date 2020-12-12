@@ -2,6 +2,7 @@
 
 library(rvest)
 library(data.table)
+library(jsonlite)
 
 # Task 1: when I change car name to Opel, it should get data from that page
 # https://joautok.hu/hasznaltauto/alfa-romeo
@@ -40,15 +41,30 @@ links_p <-
 
 links_c <- gsub("\\?.*", "", links_p)
 
+links <- c()
 
-
-for(x in links_p) {
-  test_urls <- c(test_urls, paste0(url, x, '&ref_=rlm')) 
+for(x in links_c) {
+  links <- c(links, paste0('https://www.imdb.com', x)) 
 }
 
+summary(ratings)
 
-links <- 
+
+url_demo <- links[1]
+movie_file <- read_html(url_demo)
+
+json_data <- 
+  fromJSON(movie_file %>%
+      html_nodes(xpath = "//script[@type='application/ld+json']") %>%
+      html_text())
+
+budget_p <- 
+  movie_file %>%
+  html_nodes('.txt-block:nth-child(15)') %>% 
+  html_text(trim = T)
   
+budget <- as.numeric(gsub(",","",substr(budget_p, 30, 40)))
+
 
 
 #apply a function to a list
