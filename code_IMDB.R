@@ -6,44 +6,6 @@ library(data.table)
 # Task 1: when I change car name to Opel, it should get data from that page
 # https://joautok.hu/hasznaltauto/alfa-romeo
 
-url <- 'https://www.imdb.com/search/name/?gender=male,female&start=1&ref_=rlm'
-# url <- 'https://www.imdb.com/search/name/?gender=male,female&start='
-
-test_urls <- c()
-
-for(x in seq(1,5973906,50)) {
-  test_urls <- c(test_urls, paste0(url, x, '&ref_=rlm')) 
-}
-
-
-# for (x in 1:10) {
-#   print(test_urls[x])
-# }
-# test_urls[2]
-
-file_html <- read_html(url)
-write_html(file_html, 'html_file.html')
-
-actor_names <- 
-  file_html %>% 
-  html_nodes('.lister-item-header a') %>% 
-  html_text(trim = T)
-
-
-partial_links <- 
-  file_html %>% 
-  html_nodes('.lister-item-header a') %>% 
-  html_attr('href')
-
-
-actor_links <- c()
-
-for(x in 1:length(partial_links)) {
-  actor_links <- c(actor_links, paste0('https://www.imdb.com/name', partial_links[x])) 
-}
-
-actor_links  
-  
 
 # datePublished, budget, rating (ratingValue inside aggregateRating)
 # "duration": "PT2H22M",
@@ -57,27 +19,37 @@ write_html(file_html, 'html_file.html')
 movie_names <- 
   file_html %>%  
   html_nodes('.titleColumn a') %>% 
-  html_text(trim = T)
+  html_text()
 
-
-movie_names
-
-url <- 'https://www.autotrader.com/cars-for-sale/bmw?channel=ATC&relevanceConfig=default&searchRadius=0&marketExtension=include&isNewSearch=true&showAccelerateBanner=false&sortBy=relevance&numRecords=25'
-file_html <- read_html(url)
-
-cars <- 
+ratings <- as.numeric(
   file_html %>%  
-  html_nodes('.item-card') %>% 
-  html_nodes('a')
+  html_nodes('strong') %>% 
+  html_text())
 
-cars <- 
+years_p <- 
   file_html %>%  
-  html_nodes('.positioned-overlay-base') %>% 
-  html_nodes('a') %>% 
+  html_nodes('.secondaryInfo') %>% 
+  html_text()
+
+years <- as.numeric(sub("\\).*", "", sub(".*\\(", "", years))) 
+
+links_p <- 
+  file_html %>%  
+  html_nodes('.titleColumn a') %>% 
   html_attr('href')
 
+links_c <- gsub("\\?.*", "", links_p)
 
-cars
+
+
+for(x in links_p) {
+  test_urls <- c(test_urls, paste0(url, x, '&ref_=rlm')) 
+}
+
+
+links <- 
+  
+
 
 #apply a function to a list
 df_list <- lapply(test_urls, get_one_page_from_vox)
