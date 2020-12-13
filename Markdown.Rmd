@@ -11,110 +11,160 @@ output:
 
 This is the Final Project for `Web Scraping with R` course. As a source, I used [IMDb](https://www.imdb.com/) website. IMDb^[Internet Movie Database] is an online database of information related to movies and ratings. I scraped the webpage of [Top 250 movies](https://www.imdb.com/chart/top/) 
 
+## Scrape the page
+Here we can see the screenshot from the webpage.
+![Screenshot from webpage](screenshot.png)
+
+In the webpage, we can see the **title** of the movie, its released **year**, its **rating**, and **link** to the movie. If we inspect the page, we also can see **cast** of the movie given in the movie title and **votes** given in the movie rating element. 
+After scraping the page, I built a dataframe that contains such variables as 'movie_title', 'year', 'rating', 'votes', 'cast', 'link'. 
+
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+library(rvest)
+library(data.table)
+library(jsonlite)
+library(ggplot2)
+library(knitr)
+
+url <- 'https://www.imdb.com/chart/top'
+file_html <- read_html(url)
+# write_html(file_html, 'html_file.html')
+
+boxes <- file_html %>% 
+  html_nodes('.titleColumn a')
+
+movie_names <- html_text(boxes)
+
+ratings <- as.numeric(
+  file_html %>%  
+  html_nodes('strong') %>% 
+  html_text())
+
+years_p <- 
+  file_html %>%  
+  html_nodes('.secondaryInfo') %>% 
+  html_text()
+
+years <- as.numeric(sub("\\).*", "", sub(".*\\(", "", years_p))) 
+
+links_p <- 
+  boxes %>% 
+  html_attr('href')
+
+links_c <- gsub("\\?.*", "", links_p)
+
+links <- c()
+
+for(x in links_c) {
+  links <- c(links, paste0('https://www.imdb.com', x)) 
+}
+
+actors <- 
+  boxes %>% 
+  html_attr('title')
+
+votes_p <- file_html %>% 
+  html_nodes('.imdbRating') %>% 
+  html_node('strong') %>% 
+  html_attr('title')
+
+
+votes_s <- c()
+for (x in votes_p) {
+  votes_s <- c(votes_s, gsub(',','',
+                             gsub(' user ratings','',
+                                  gsub('.*?based on ','',
+                                       x))))
+}
+
+votes <- c()
+for (x in votes_s) {
+  votes <- c(votes, as.numeric(x))
+}
+# to create a dataframe
+df_to_show <- data.frame('movie_title' = movie_names, 
+                 'year' = years, 
+                 'rating' = ratings,
+                 'votes' = votes_s,
+                 'cast' = actors, 
+                 'link' = links)  
+
+df <- data.frame('movie_title' = movie_names, 
+                 'year' = years, 
+                 'rating' = ratings,
+                 'votes' = votes,
+                 'cast' = actors, 
+                 'link' = links)
+
+
+```
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+knitr::kable(df_to_show[1:4,1:6], caption = "Dataframe", floating.environment="sidewaystable")
+
+```
+
+## First EDA: years
+
+This statistics shows that the oldest movie (min) is taken in 1921, and youngest is in 2020 (max). In this list, movies that are released in 84 different years are given.
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+kable(as.array(summary(years)), caption = "Summary statistics for years movie released")
+```
+
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+uniques <- unique(years)
+
+qplot(years, 
+      geom="histogram", 
+      binwidth = 1,
+      xlim=c(1921,2020)) 
+most_appeared_years <- table(years)
+
+```
+
+Most of the movies in the list are released in **1995** (8) movies, in **2019** (7 movies) and in **1957** (6 movies)  
+
+
+## Second EDA: ratings
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+kable(as.array(summary(ratings)), caption = "Summary statistics of ratings")
+```
+
+The minimum rating that is given to movie is 8.0 and the maximum rating that is given to movie is 9.2
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+
+hist(
+  ratings,
+  col = 'skyblue3')
+```
+
+Histogram of ratings has long right tail. Most of the (more than 100) movies got rating between 8.0 and 8.1. Few number of movies got rating between 8.6 and 9.2
+
+
+# Third EDA: votes
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+kable(as.array(summary(votes)), caption = "Summary statistics of votes")
+```
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+
+hist(
+  votes,
+  col = 'skyblue3')
+```
+
+Histogram of votes is also skewed to right. Most of the movies obtained votes between 0 and 500000. Only few number of movies obtained more than one and half million votes 
+
+
 
 It is better to use boxes in this function: get_one_page_from_vox
 and apply a function for the boxes.
 
 You could also show your df result in the html.
 
-## First function
 
-The function `get_one_page_from_vox()` accepts url as an argument. Then it downloads information from that passed url to dataframe 
-
-```{r, warning=FALSE, message=FALSE}
-
-library(rvest)
-library(data.table)
-
-# a function which downloads information from the website to dataframe
-get_one_page_from_vox <- function(arg_url) {
-  
-  # to get a web page, pass URL to read_html 
-  file_html <- read_html(arg_url)
-  
-  # save it as html document
-  write_html(file_html, 'html_file.html')
-  
-  headings <- 
-    file_html %>% 
-    html_nodes('.c-entry-box--compact__title') %>% 
-    html_text()
-  
-  post_links <- 
-    file_html %>% 
-    html_nodes('.c-entry-box--compact__title') %>% 
-    html_nodes('a') %>%
-    html_attr('href')
-  
-  posted_date <- 
-    file_html %>% 
-    html_nodes('time') %>% 
-    html_text(trim = TRUE)
-  
-  author <- 
-    file_html %>% 
-    html_nodes('.c-byline__item') %>% 
-    html_text(trim = TRUE) 
-  
-  authors <- c()
-  
-  for(x in seq(1,length(author),3)) {
-    authors <- c(authors, author[x]) 
-  }
-  
-  # to create a dataframe
-  df <- data.frame('headings' = headings, 'post_link' = post_links, 'date' = posted_date, 'author' = authors)  
-  
-  return(df)
-}
-```
-
-### Testing the function
-
-``` {r, warning=FALSE, message=FALSE}
-
-# test the function
-test_df <- get_one_page_from_vox('https://www.vox.com/search?page=1&q=Biden')
-
-# generate the URLs
-test_urls <- paste0('https://www.vox.com/search?page=', 1:5, '&q=Biden' )
-
-#apply a function to a list
-df_list <- lapply(test_urls, get_one_page_from_vox)
-
-#create a data.table object of the list of data.frames
-df <- rbindlist(df_list)
-```
-
-## Second function
-
-The function `get_vox_pages()` requires two arguments. First a keyword then a number of pages to download.
-Inside the function, the links are created and `get_one_page_from_vox()` function is applied to the links that are created.
-It also creates the dataframe, saves it into csv and rds objects.
-
-``` {r, warning=FALSE, message=FALSE}
-library(readr)
-
-get_vox_pages <- function(keyword, no_pages){
-  main_url <- 'https://www.vox.com/search?page='
-
-  # generate the URLs
-  links <- paste0(main_url, 1:no_pages, '&q=', keyword)
-  return_df <- rbindlist(lapply(links, get_one_page_from_vox))
-  
-  write_csv(return_df, 'data/result.csv')
-  saveRDS(return_df, file = 'data/rdsfile.rds')
-
-  
-  return(return_df)
-}
-
-```
-
-### Testing the function
-
-```{r, warning=FALSE, message=FALSE}
-
-# check the function
-returned_df <- get_vox_pages(keyword = 'Biden', 6)
-```
