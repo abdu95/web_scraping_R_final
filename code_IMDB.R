@@ -51,30 +51,8 @@ summary(ratings)
 
 
 
-url_demo <- links[1]
-movie_file <- read_html(url_demo)
 
-json_data <- 
-  fromJSON(movie_file %>%
-      html_nodes(xpath = "//script[@type='application/ld+json']") %>%
-      html_text())
 
-revenue_p <- 
-  movie_file %>%
-  html_nodes('.txt-block:nth-child(15)') %>% 
-  html_text(trim = T)
-  
-revenue <- as.numeric(gsub(",","",substr(revenue_p, 30, 40)))
-
-budget_p <- 
-  movie_file %>%
-  html_nodes('#titleDetails .txt-block:nth-child(12)') %>% 
-  html_text(trim = T)
-
-budget <- as.numeric(gsub(",","",substr(budget_p, 9, 18)))
-log(budget)
-budget
-# is there a connection between the revenue and the budget.
 
 qplot(years, 
       geom="histogram", 
@@ -114,51 +92,86 @@ uniques <- unique(years)
 
 
 
-#apply a function to a list
-df_list <- lapply(test_urls, get_one_page_from_vox)
-
 
 # a function which downloads information from the website to dataframe
-get_one_page_from_vox <- function(arg_url) {
-  
-  # to get a web page, pass URL to read_html 
-  file_html <- read_html(arg_url)
+get_revenue_budget <- function(arg_url) {
   
   # save it as html document
-  write_html(file_html, 'html_file.html')
+  # write_html(file_html, 'html_file.html')
   
-  headings <- 
-    file_html %>% 
-    html_nodes('.c-entry-box--compact__title') %>% 
-    html_text()
+  # headings <- 
+  #   file_html %>% 
+  #   html_nodes('.c-entry-box--compact__title') %>% 
+  #   html_text()
+  # 
+  # post_links <- 
+  #   file_html %>% 
+  #   html_nodes('.c-entry-box--compact__title') %>% 
+  #   html_nodes('a') %>%
+  #   html_attr('href')
+  # 
+  # posted_date <- 
+  #   file_html %>% 
+  #   html_nodes('time') %>% 
+  #   html_text(trim = TRUE)
+  # 
+  # author <- 
+  #   file_html %>% 
+  #   html_nodes('.c-byline__item') %>% 
+  #   html_text(trim = TRUE) 
+  # 
+  # authors <- c()
+  # 
+  # for(x in seq(1,length(author),3)) {
+  #   authors <- c(authors, author[x]) 
+  # }
   
-  post_links <- 
-    file_html %>% 
-    html_nodes('.c-entry-box--compact__title') %>% 
-    html_nodes('a') %>%
-    html_attr('href')
+  # to get a web page, pass URL to read_html 
+  url_current <- arg_url
+  movie_file <- read_html(url_current)
   
-  posted_date <- 
-    file_html %>% 
-    html_nodes('time') %>% 
-    html_text(trim = TRUE)
+  # df_json <- json_data <- 
+  #   fromJSON(movie_file %>%
+  #              html_nodes(xpath = "//script[@type='application/ld+json']") %>%
+  #              html_text())
   
-  author <- 
-    file_html %>% 
-    html_nodes('.c-byline__item') %>% 
-    html_text(trim = TRUE) 
+  # df_json$duration
+  # name_of_movie <- df_json$name 
   
-  authors <- c()
+  revenue_p <- 
+    movie_file %>%
+    html_nodes('.txt-block:nth-child(15)') %>% 
+    html_text(trim = T)
   
-  for(x in seq(1,length(author),3)) {
-    authors <- c(authors, author[x]) 
-  }
+  revenue <- as.numeric(gsub(",","",substr(revenue_p, 30, 40)))
+  
+  # budget_p <- 
+  #   movie_file %>%
+  #   html_nodes('#titleDetails .txt-block:nth-child(12)') %>% 
+  #   html_text(trim = T)
+  # 
+  # budget <- as.numeric(gsub(",","",substr(budget_p, 9, 18)))
+  
+  # log(budget)
+  
+  # is there a connection between the revenue and the budget.
+
   
   # to create a dataframe
-  df <- data.frame('headings' = headings, 'post_link' = post_links, 'date' = posted_date, 'author' = authors)  
+  # df_b_r <- data.frame('budget' = budget, 'revenue' = revenue)  
+  # df_b_r <- data.frame('name' = name_of_movie)  
+  # df_b_r <- data.frame('revenue' = revenue)    
   
-  return(df)
+  return(revenue)
 }
+
+#apply a function to a list
+# df_list <- lapply(df$link, get_revenue_budget)
+df_list <- sapply(df$link, get_revenue_budget)
+
+# warning: 5: In FUN(X[[i]], ...) : NAs introduced by coercion
+
+
 
 # test the function
 test_df <- get_one_page_from_vox('https://www.vox.com/search?page=1&q=Biden')
