@@ -9,7 +9,7 @@ output:
 
 ## Introduction
 
-This is the Final Project for `Web Scraping with R` course. As a source, I used [IMDb](https://www.imdb.com/) website. IMDb^[Internet Movie Database] is an online database of information related to movies and ratings. I scraped the webpage of [Top 250 movies](https://www.imdb.com/chart/top/) 
+This is the Final Project for `Web Scraping with R` course. As a source, I used [IMDb](https://www.imdb.com/) website. IMDb^[Internet Movie Database] is an online database of information related to movies and ratings. I scraped the webpage of [Top 250 movies](https://www.imdb.com/chart/top/). Code can be found [here](https://github.com/abdu95/web_scraping_R_final)
 
 ## Scrape the page
 Here we can see the screenshot from the webpage.

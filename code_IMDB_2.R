@@ -1,8 +1,5 @@
 library(stringr)
 library(dplyr)
-# movie with the highest budget
-# movie with the lowest budget
-
 
 # a function which downloads information from the website to dataframe
 get_movies <- function(arg_url) {
