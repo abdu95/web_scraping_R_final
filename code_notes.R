@@ -80,6 +80,7 @@ get_revenue_budget <- function(arg_url) {
     movie_file %>%
     html_nodes('.txt-block:nth-child(15)') %>% 
     html_text(trim = T)
+
   
   revenue <- as.numeric(gsub(",","",substr(revenue_p, 30, 40)))
   
@@ -102,6 +103,10 @@ get_revenue_budget <- function(arg_url) {
   
   return(revenue)
 }
+
+movie_title <- 
+  movie_file %>% 
+  html_nodes('.title_wrapper') 
 
 #apply a function to a list
 # df_list <- lapply(df$link, get_revenue_budget)
