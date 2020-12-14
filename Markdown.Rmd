@@ -329,5 +329,12 @@ ggplot(top_movies, aes(x=movie_title, y=revenue)) + geom_point(color="blue") +
 
 ```
 
+## Summary
+
+In this assignment I scraped the webpage of Top 250 movies in IMDb and tried to analyze them. During the process, I faced several challenges. I had to understand the hierarchy of the webpage in order to extract the necessary element from it. The data was in text format and I had to clean it, extract number from it and convert it to suitable format. However, I am glad that I gained sufficient amount of knowledge throughout the process including extracting data from web, working with functions, building a dataframe from the obtained data. 
+
+By analyzing this data, I found out that movies with highest revenue does not necessarily achieve highest rating in this website. This means for users, how much money directors spend for the movie is not the number one factor to determine its quality. The movies with deep philosophical meaning and best acting have been more appreciated by the users, as it is the case for the top rated movie **The Shawshank Redemption**. 
+
+
 ## Side note: 
 It takes 1.5 seconds to obtain data from one webpage. Since the code is obtaining data from 250 webpages, it took 7-8 minutes to compile the code fully and achieve the result. Therefore, if you want to execute R code or compile R markdown, I would ask you to be patient and wait 7-8 minutes to see the end result.
